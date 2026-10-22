@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pierce Protein Board</title>
+<meta name="description" content="Today's Pierce Dining Hall menu, ranked by protein and by student ratings.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f6f4ef;
+  --card: #ffffff;
+  --ink: #1d2420;
+  --muted: #6b726d;
+  --line: #e4e1d8;
+  --accent: #c8402c;
+  --accent-soft: #fbe9e5;
+  --green: #4f6b57;
+  --green-soft: #e6eee8;
+  --star: #e0a526;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #151816; --card: #1e2320; --ink: #eef0ec; --muted: #9aa39d; --line: #2e3531;
+    --accent: #ff7a63; --accent-soft: #3a221d; --green: #9cc2a6; --green-soft: #233029; --star: #f2bd4b;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #151816; --card: #1e2320; --ink: #eef0ec; --muted: #9aa39d; --line: #2e3531;
+  --accent: #ff7a63; --accent-soft: #3a221d; --green: #9cc2a6; --green-soft: #233029; --star: #f2bd4b;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.45 Inter, system-ui, sans-serif; }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 24px 16px 48px; }
+header h1 { font-family: "Big Shoulders Display", Impact, sans-serif; font-size: 44px; line-height: 1; margin: 0; letter-spacing: .5px; text-transform: uppercase; }
+header h1 span { color: var(--accent); }
+.sub { color: var(--muted); margin: 6px 0 18px; }
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px; }
+.tabs button { border: 1px solid var(--line); background: var(--card); color: var(--ink); padding: 7px 14px; border-radius: 999px; font: 500 14px Inter, sans-serif; cursor: pointer; }
+.tabs button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 760px) { .grid { grid-template-columns: 1fr; } header h1 { font-size: 36px; } }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; min-width: 0; }
+.card h2 { font-family: "Big Shoulders Display", Impact, sans-serif; font-size: 26px; margin: 0; text-transform: uppercase; letter-spacing: .4px; }
+.card .hint { color: var(--muted); font-size: 13px; margin: 2px 0 12px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin-bottom: 10px; }
+.seg button { border: 0; background: transparent; color: var(--muted); padding: 5px 10px; font: 500 13px Inter, sans-serif; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--green-soft); color: var(--green); }
+ol { list-style: none; margin: 0; padding: 0; }
+li.row { display: grid; grid-template-columns: 28px 1fr auto; gap: 10px; align-items: center; padding: 9px 0; border-top: 1px solid var(--line); }
+li.row:first-child { border-top: 0; }
+.rank { font-family: "Big Shoulders Display", Impact, sans-serif; font-size: 22px; color: var(--muted); text-align: center; }
+li.row:nth-child(-n+3) .rank { color: var(--accent); }
+.name { font-weight: 600; overflow-wrap: anywhere; }
+.meta { color: var(--muted); font-size: 12.5px; }
+.num { text-align: right; white-space: nowrap; }
+.num b { font-size: 18px; }
+.num small { display: block; color: var(--muted); font-size: 12px; }
+.bar { height: 5px; background: var(--accent-soft); border-radius: 3px; margin-top: 5px; }
+.bar i { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+.stars { color: var(--star); letter-spacing: 1px; }
+.rate { margin-top: 16px; }
+.rate-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line); flex-wrap: wrap; }
+.rate-row:first-child { border-top: 0; }
+.picker { display: flex; gap: 2px; }
+.picker button { border: 0; background: none; font-size: 24px; line-height: 1; cursor: pointer; color: var(--line); padding: 2px; }
+.picker button.on { color: var(--star); }
+.picker[data-done] button { cursor: default; }
+.done { color: var(--green); font-size: 13px; font-weight: 500; }
+.empty { color: var(--muted); padding: 12px 0; }
+footer { color: var(--muted); font-size: 12.5px; margin-top: 24px; }
+footer a { color: inherit; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Pierce <span>Protein</span> Board</h1>
+    <p class="sub" id="sub">Loading today's menu…</p>
+  </header>
+  <div class="tabs" id="tabs" role="group" aria-label="Meal"></div>
+
+  <div class="grid">
+    <section class="card">
+      <h2>Most protein</h2>
+      <p class="hint">Per serving, from Pierce's own nutrition data.</p>
+      <ol id="protein"></ol>
+    </section>
+    <section class="card">
+      <h2>Student ratings</h2>
+      <p class="hint">How good was the protein? Only dishes on today's menu.</p>
+      <div class="seg" role="group" aria-label="Rating window">
+        <button data-win="day" aria-pressed="true">Today's votes</button>
+        <button data-win="all" aria-pressed="false">All-time</button>
+      </div>
+      <ol id="ratings"></ol>
+    </section>
+  </div>
+
+  <section class="card rate">
+    <h2>Rate what you ate</h2>
+    <p class="hint">Tap the stars after your meal. One vote per dish per day on this device.</p>
+    <div id="rate"></div>
+  </section>
+
+  <footer>
+    Menu and nutrition: <a href="https://dineoncampus.com/stevensdining/pierce-dining-hall" target="_blank" rel="noopener">DineOnCampus</a>.
+    A student prototype for MGT 103 (Team Trendsetters). Not affiliated with Stevens Dining.
+  </footer>
+</div>
+
+<script>
+const LOC = '58adee613191a2d1edd788c4';
+const API = 'https://api.dineoncampus.com/v1/location/' + LOC + '/periods';
+const RATINGS = 'https://script.google.com/macros/s/AKfycbxuT-n1WDsYWImOxfdiOBjAqUj3704R61HIkWkDJIhpvjU-NjBgt7Ik9bxwPyxZEFZuCA/exec';
+// Toppings, sauces and sides that aren't a protein choice.
+const SKIP = /^(sliced|diced|shredded|crumbled|grated|chopped)\b|\b(sauce|dressing|vinaigrette|ketchup|mustard|mayo(nnaise)?|relish|syrup|gravy|salsa|aioli|hummus|cheese|crumbles?|croutons?|seeds|nuts)$/i;
+
+const state = { date: '', periods: [], dishes: {}, period: '', win: 'day', votes: { all: {}, day: {} } };
+
+function etToday() {
+  const p = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', hourCycle: 'h23' })
+    .formatToParts(new Date()).reduce((o, x) => (o[x.type] = x.value, o), {});
+  return { y: +p.year, m: +p.month, d: +p.day, h: +p.hour };
+}
+const key = s => String(s).trim().toLowerCase().replace(/\s+/g, ' ');
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const nut = (it, re) => { const n = (it.nutrients || []).find(x => re.test(x.name)); return n ? parseFloat(n.value_numeric) : NaN; };
+
+function store(k, v) { try { if (v === undefined) return JSON.parse(localStorage.getItem(k) || 'null'); localStorage.setItem(k, JSON.stringify(v)); } catch (e) { return null; } }
+
+async function loadMenu() {
+  const t = etToday();
+  state.date = `${t.y}-${String(t.m).padStart(2, '0')}-${String(t.d).padStart(2, '0')}`;
+  const q = `?platform=0&date=${t.y}-${t.m}-${t.d}`;
+  const list = await (await fetch(API + q)).json();
+  state.periods = (list.periods || []).sort((a, b) => a.sort_order - b.sort_order);
+  await Promise.all(state.periods.map(async p => {
+    const r = await (await fetch(API + '/' + p.id + q)).json();
+    const seen = new Map();
+    for (const c of (r.menu && r.menu.periods && r.menu.periods.categories) || []) {
+      for (const it of c.items) {
+        const protein = nut(it, /^protein/i), kcal = nut(it, /^calories/i);
+        if (!(protein >= 0) || protein > 100 || kcal > 2500) continue; // bad data happens
+        if (SKIP.test(it.name)) continue;
+        const k = key(it.name);
+        if (!seen.has(k) || seen.get(k).protein < protein)
+          seen.set(k, { name: it.name.trim(), key: k, station: c.name, protein, kcal, portion: it.portion || '' });
+      }
+    }
+    state.dishes[p.name] = [...seen.values()];
+  }));
+  // default tab: the meal being served now (ET)
+  const h = t.h, names = state.periods.map(p => p.name);
+  const pick = h < 11 ? /breakfast|brunch/i : h < 16 ? /lunch|brunch/i : h < 21 ? /dinner/i : /late/i;
+  state.period = names.find(n => pick.test(n)) || names[0] || '';
+}
+
+async function loadVotes() {
+  try { state.votes = await (await fetch(RATINGS + '?date=' + state.date)).json(); } catch (e) { /* keep empty */ }
+}
+
+function renderTabs() {
+  const el = document.getElementById('tabs');
+  el.innerHTML = state.periods.map(p => `<button aria-pressed="${p.name === state.period}">${esc(p.name)}</button>`).join('');
+  el.querySelectorAll('button').forEach(b => b.onclick = () => { state.period = b.textContent; render(); });
+}
+
+function renderProtein(dishes) {
+  const top = dishes.filter(d => d.protein >= 5).sort((a, b) => b.protein - a.protein).slice(0, 12);
+  const max = top.length ? top[0].protein : 1;
+  document.getElementById('protein').innerHTML = top.length ? top.map((d, i) => `
+    <li class="row"><span class="rank">${i + 1}</span>
+      <div><div class="name">${esc(d.name)}</div>
+        <div class="meta">${esc(d.station)}${d.portion ? ' · ' + esc(d.portion) : ''}${d.kcal > 0 ? ' · ' + Math.round(d.protein / d.kcal * 100) + ' g per 100 kcal' : ''}</div>
+        <div class="bar"><i style="width:${d.protein / max * 100}%"></i></div></div>
+      <div class="num"><b>${d.protein} g</b><small>${d.kcal > 0 ? d.kcal + ' kcal' : ''}</small></div></li>`).join('')
+    : '<li class="empty">No protein data for this meal.</li>';
+}
+
+function renderRatings(dishes) {
+  const src = state.votes[state.win] || {};
+  const rows = dishes.filter(d => src[d.key]).map(d => ({ ...d, avg: src[d.key][0] / src[d.key][1], n: src[d.key][1] }))
+    .sort((a, b) => b.avg - a.avg || b.n - a.n).slice(0, 12);
+  document.getElementById('ratings').innerHTML = rows.length ? rows.map((d, i) => `
+    <li class="row"><span class="rank">${i + 1}</span>
+      <div><div class="name">${esc(d.name)}</div><div class="meta">${esc(d.station)} · ${d.protein} g protein</div></div>
+      <div class="num"><b>${d.avg.toFixed(1)}</b> <span class="stars">★</span><small>${d.n} vote${d.n > 1 ? 's' : ''}</small></div></li>`).join('')
+    : `<li class="empty">${state.win === 'day' ? 'No votes yet today. Be the first below.' : 'None of these dishes has been rated yet.'}</li>`;
+}
+
+function renderRate(dishes) {
+  const mine = store('votes-' + state.date) || {};
+  const list = dishes.filter(d => d.protein >= 10).sort((a, b) => b.protein - a.protein);
+  const el = document.getElementById('rate');
+  el.innerHTML = list.length ? list.map(d => {
+    const v = mine[d.key];
+    return `<div class="rate-row"><div><div class="name">${esc(d.name)}</div><div class="meta">${esc(d.station)} · ${d.protein} g protein</div></div>
+      <div class="picker" data-key="${esc(d.key)}" data-name="${esc(d.name)}"${v ? ' data-done' : ''}>
+        ${[1, 2, 3, 4, 5].map(s => `<button aria-label="${s} star${s > 1 ? 's' : ''}" class="${v && s <= v ? 'on' : ''}">★</button>`).join('')}
+        ${v ? '<span class="done">Thanks!</span>' : ''}</div></div>`;
+  }).join('') : '<p class="empty">No protein dishes listed for this meal.</p>';
+  el.querySelectorAll('.picker:not([data-done])').forEach(p => {
+    const btns = [...p.querySelectorAll('button')];
+    btns.forEach((b, i) => {
+      b.onmouseenter = () => btns.forEach((x, j) => x.classList.toggle('on', j <= i));
+      b.onclick = () => vote(p.dataset.key, p.dataset.name, i + 1);
+    });
+    p.onmouseleave = () => btns.forEach(x => x.classList.remove('on'));
+  });
+}
+
+async function vote(k, name, stars) {
+  const mine = store('votes-' + state.date) || {};
+  if (mine[k]) return;
+  mine[k] = stars; store('votes-' + state.date, mine);
+  render();
+  try {
+    // text/plain keeps this a simple CORS request (no preflight, which Apps Script can't answer)
+    const r = await fetch(RATINGS, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ dish: name, stars, date: state.date }) });
+    const j = await r.json();
+    if (j.all) state.votes = j;
+  } catch (e) { await loadVotes(); }
+  render();
+}
+
+function render() {
+  renderTabs();
+  const dishes = state.dishes[state.period] || [];
+  renderProtein(dishes); renderRatings(dishes); renderRate(dishes);
+}
+
+document.querySelectorAll('.seg button').forEach(b => b.onclick = () => {
+  state.win = b.dataset.win;
+  document.querySelectorAll('.seg button').forEach(x => x.setAttribute('aria-pressed', x === b));
+  render();
+});
+
+(async () => {
+  const sub = document.getElementById('sub');
+  try {
+    await Promise.all([loadMenu().then(loadVotes)]);
+    const d = new Date(state.date + 'T12:00:00');
+    sub.textContent = 'Pierce Dining Hall · ' + d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+    if (!state.periods.length) sub.textContent += ' · Pierce has no menu posted today.';
+    render();
+  } catch (e) {
+    sub.innerHTML = 'Couldn’t load today’s menu. Try refreshing, or check <a href="https://dineoncampus.com/stevensdining/pierce-dining-hall">DineOnCampus</a>.';
+  }
+})();
+</script>
+</body>
+</html>
