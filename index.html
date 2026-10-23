@@ -130,14 +130,6 @@ const nut = (it, re) => { const n = (it.nutrients || []).find(x => re.test(x.nam
 
 function store(k, v) { try { if (v === undefined) return JSON.parse(localStorage.getItem(k) || 'null'); localStorage.setItem(k, JSON.stringify(v)); } catch (e) { return null; } }
 
-// Owner unlock: open the page once with #owner=<key>; the key stays on this device only.
-(() => {
-  const m = location.hash.match(/^#owner=(.+)$/);
-  if (!m) return;
-  store('owner-key', decodeURIComponent(m[1]));
-  history.replaceState(null, '', location.pathname + location.search);
-})();
-
 async function loadMenu() {
   const t = etToday();
   state.date = `${t.y}-${String(t.m).padStart(2, '0')}-${String(t.d).padStart(2, '0')}`;
@@ -226,7 +218,7 @@ async function vote(k, name, stars) {
   render();
   try {
     // text/plain keeps this a simple CORS request (no preflight, which Apps Script can't answer)
-    const r = await fetch(RATINGS, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ dish: name, stars, date: state.date, key: store('owner-key') || '' }) });
+    const r = await fetch(RATINGS, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ dish: name, stars, date: state.date }) });
     const j = await r.json();
     if (j.all) state.votes = j;
   } catch (e) { await loadVotes(); }
