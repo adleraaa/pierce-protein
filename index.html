@@ -211,6 +211,8 @@ function renderTabs() {
 
 const L = (en, zh) => ZH ? zh : en;
 // Chinese name first, English underneath so it still matches the sign at the station
+// stations keep their English name too, since that's what the sign over the counter says
+const stationName = s => tr(s) !== s ? `${esc(tr(s))} ${esc(s)}` : esc(s);
 const dishName = d => tr(d.name) !== d.name ? `${esc(tr(d.name))}<span class="en">${esc(d.name)}</span>` : esc(d.name);
 
 function renderProtein(dishes) {
@@ -219,7 +221,7 @@ function renderProtein(dishes) {
   document.getElementById('protein').innerHTML = top.length ? top.map((d, i) => `
     <li class="row"><span class="rank">${i + 1}</span>
       <div><div class="name">${dishName(d)}</div>
-        <div class="meta">${esc(tr(d.station))}${d.portion ? ' · ' + esc(d.portion) : ''}${d.kcal > 0 ? ' · ' + L(Math.round(d.protein / d.kcal * 100) + ' g per 100 kcal', '每 100 kcal 含 ' + Math.round(d.protein / d.kcal * 100) + ' g') : ''}</div>
+        <div class="meta">${stationName(d.station)}${d.portion ? ' · ' + esc(d.portion) : ''}${d.kcal > 0 ? ' · ' + L(Math.round(d.protein / d.kcal * 100) + ' g per 100 kcal', '每 100 kcal 含 ' + Math.round(d.protein / d.kcal * 100) + ' g') : ''}</div>
         <div class="bar"><i style="width:${d.protein / max * 100}%"></i></div></div>
       <div class="num"><b>${d.protein} g</b><small>${d.kcal > 0 ? d.kcal + ' kcal' : ''}</small></div></li>`).join('')
     : `<li class="empty">${L('No protein data for this meal.', '这一餐没有蛋白质数据。')}</li>`;
@@ -231,7 +233,7 @@ function renderRatings(dishes) {
     .sort((a, b) => b.avg - a.avg || b.n - a.n).slice(0, 12);
   document.getElementById('ratings').innerHTML = rows.length ? rows.map((d, i) => `
     <li class="row"><span class="rank">${i + 1}</span>
-      <div><div class="name">${dishName(d)}</div><div class="meta">${esc(tr(d.station))} · ${L(d.protein + ' g protein', '蛋白质 ' + d.protein + ' g')}</div></div>
+      <div><div class="name">${dishName(d)}</div><div class="meta">${stationName(d.station)} · ${L(d.protein + ' g protein', '蛋白质 ' + d.protein + ' g')}</div></div>
       <div class="num"><b>${d.avg.toFixed(1)}</b> <span class="stars">★</span><small>${L(d.n + ' vote' + (d.n > 1 ? 's' : ''), d.n + ' 票')}</small></div></li>`).join('')
     : `<li class="empty">${state.win === 'day' ? L('No votes yet today. Be the first below.', '今天还没人投票，在下面投第一票。') : L('None of these dishes has been rated yet.', '这些菜还没有人评过分。')}</li>`;
 }
@@ -242,7 +244,7 @@ function renderRate(dishes) {
   const el = document.getElementById('rate');
   el.innerHTML = list.length ? list.map(d => {
     const v = mine[d.key];
-    return `<div class="rate-row"><div><div class="name">${dishName(d)}</div><div class="meta">${esc(tr(d.station))} · ${L(d.protein + ' g protein', '蛋白质 ' + d.protein + ' g')}</div></div>
+    return `<div class="rate-row"><div><div class="name">${dishName(d)}</div><div class="meta">${stationName(d.station)} · ${L(d.protein + ' g protein', '蛋白质 ' + d.protein + ' g')}</div></div>
       <div class="picker" data-key="${esc(d.key)}" data-name="${esc(d.name)}"${v ? ' data-done' : ''}>
         ${[1, 2, 3, 4, 5].map(s => `<button aria-label="${L(s + ' star' + (s > 1 ? 's' : ''), s + ' 星')}" class="${v && s <= v ? 'on' : ''}">★</button>`).join('')}
         ${v ? `<span class="done">${L('Thanks!', '谢谢！')}</span>` : ''}</div></div>`;
