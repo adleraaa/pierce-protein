@@ -141,7 +141,7 @@ const ZH_TEXT = {
   title: 'Pierce <span>蛋白质</span>榜',
   loading: '正在加载今天的菜单…',
   most: '蛋白质最多',
-  mostHint: '每份的含量，数据来自 Pierce 官方营养信息。只列每天轮换的菜，烤鸡胸、鸡蛋这类天天有的不列。',
+  mostHint: '每份的含量，数据来自 Pierce 官方营养信息。除早餐外只列每天轮换的菜，烤鸡胸、鸡蛋这类天天有的不列。',
   ratings: '学生评分',
   ratingsHint: '蛋白质好不好吃？只列今天菜单上的菜。',
   winDay: '今天',
@@ -273,7 +273,9 @@ async function vote(k, name, stars) {
 
 function render() {
   renderTabs();
-  const dishes = (state.dishes[state.period] || []).filter(d => !fixedSet.has(d.station + '||' + d.name.replace(/\s+/g, ' ')));
+  // breakfast is nearly all staples, so it keeps the full list
+  const keepAll = /breakfast/i.test(state.period);
+  const dishes = (state.dishes[state.period] || []).filter(d => keepAll || !fixedSet.has(d.station + '||' + d.name.replace(/\s+/g, ' ')));
   renderProtein(dishes); renderRatings(dishes); renderRate(dishes);
 }
 
