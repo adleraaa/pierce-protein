@@ -133,8 +133,9 @@ const nut = (it, re) => { const n = (it.nutrients || []).find(x => re.test(x.nam
 
 function store(k, v) { try { if (v === undefined) return JSON.parse(localStorage.getItem(k) || 'null'); localStorage.setItem(k, JSON.stringify(v)); } catch (e) { return null; } }
 
-// Chinese UI: ?lang=zh. Dish and station names are machine-translated and cached on this device;
-// votes still go in under the English name so both versions share one set of ratings.
+// Chinese UI: ?lang=zh. Dish and station names come from zh.json (hand-translated from every
+// Pierce menu Aug–Dec 2026); anything not in it stays English. Votes still go in under the
+// English name so both versions share one set of ratings.
 const ZH = new URLSearchParams(location.search).get('lang') === 'zh';
 const ZH_TEXT = {
   title: 'Pierce <span>蛋白质</span>榜',
@@ -147,31 +148,15 @@ const ZH_TEXT = {
   winAll: '全部',
   rate: '给吃过的打分',
   rateHint: '吃完点星星。同一台设备每道菜每天只能投一票。',
-  footer: '菜单和营养数据：<a href="https://dineoncampus.com/stevensdining/pierce-dining-hall" target="_blank" rel="noopener">DineOnCampus</a>。菜名为机器翻译。MGT 103 学生原型（Team Trendsetters），与 Stevens Dining 无关。',
+  footer: '菜单和营养数据：<a href="https://dineoncampus.com/stevensdining/pierce-dining-hall" target="_blank" rel="noopener">DineOnCampus</a>。MGT 103 学生原型（Team Trendsetters），与 Stevens Dining 无关。',
 };
 const MEALS = { breakfast: '早餐', brunch: '早午餐', lunch: '午餐', dinner: '晚餐', 'late night': '夜宵' };
-// Pierce's station names, and dishes the machine translation gets wrong
-const ZH_FIXED = {
-  'Delicious Without': '无过敏原', Omelet: '煎蛋卷', Grill: '烤台', Salad: '沙拉吧', 'The Soup Bowl': '汤',
-  Homestyle: '家常菜', Pizza: '披萨', Pasta: '意面', Deli: '三明治', Rotisserie: '烤肉', Sushi: '寿司',
-  'Hamburger on Bun': '汉堡', 'Thinly Sliced Deli Turkey Breast': '火鸡胸肉薄片', 'Chili Rub Chicken': '辣粉烤鸡',
-};
-const zhCache = Object.assign((ZH && store('zh-names')) || {}, ZH_FIXED);
-const tr = s => (ZH && zhCache[s]) || s;
+let zhCache = {};
+const tr = s => (ZH && zhCache[String(s).replace(/\s+/g, ' ')]) || s;
 const meal = s => (ZH && MEALS[key(s)]) || s;
 
-async function translateNames(names) {
-  const todo = [...new Set(names)].filter(n => n && !zhCache[n]);
-  // one request per batch of ~40 lines; Google's gtx endpoint allows CORS
-  for (let i = 0; i < todo.length; i += 40) {
-    const batch = todo.slice(i, i + 40);
-    try {
-      const r = await (await fetch('https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh-CN&dt=t&q=' + encodeURIComponent(batch.join('\n')))).json();
-      const out = r[0].map(x => x[0]).join('').split('\n');
-      if (out.length === batch.length) batch.forEach((n, j) => { if (out[j].trim()) zhCache[n] = out[j].trim(); });
-    } catch (e) { /* fall back to English */ }
-  }
-  store('zh-names', zhCache);
+async function loadZh() {
+  try { zhCache = await (await fetch('zh.json')).json(); } catch (e) { /* stay English */ }
 }
 
 if (ZH) {
@@ -219,7 +204,7 @@ function renderTabs() {
 
 const L = (en, zh) => ZH ? zh : en;
 // Chinese name first, English underneath so it still matches the sign at the station
-const dishName = d => ZH && zhCache[d.name] ? `${esc(zhCache[d.name])}<span class="en">${esc(d.name)}</span>` : esc(d.name);
+const dishName = d => tr(d.name) !== d.name ? `${esc(tr(d.name))}<span class="en">${esc(d.name)}</span>` : esc(d.name);
 
 function renderProtein(dishes) {
   const top = dishes.filter(d => d.protein >= 5).sort((a, b) => b.protein - a.protein).slice(0, 12);
@@ -294,8 +279,7 @@ document.querySelectorAll('.seg button').forEach(b => b.onclick = () => {
 (async () => {
   const sub = document.getElementById('sub');
   try {
-    await loadMenu();
-    await Promise.all([loadVotes(), ZH ? translateNames(Object.values(state.dishes).flat().flatMap(d => [d.name, d.station])) : null]);
+    await Promise.all([loadMenu().then(loadVotes), ZH ? loadZh() : null]);
     const d = new Date(state.date + 'T12:00:00');
     sub.textContent = L('Pierce Dining Hall', 'Pierce 食堂') + ' · ' + d.toLocaleDateString(L('en-US', 'zh-CN'), { weekday: 'long', month: 'long', day: 'numeric' });
     if (!state.periods.length) sub.textContent += L(' · Pierce has no menu posted today.', ' · Pierce 今天没有发菜单。');
