@@ -141,7 +141,7 @@ const ZH_TEXT = {
   title: 'Pierce <span>蛋白质</span>榜',
   loading: '正在加载今天的菜单…',
   most: '蛋白质最多',
-  mostHint: '每份的含量，数据来自 Pierce 官方营养信息。',
+  mostHint: '每份的含量，数据来自 Pierce 官方营养信息。只列每天轮换的菜，烤鸡胸、鸡蛋这类天天有的不列。',
   ratings: '学生评分',
   ratingsHint: '蛋白质好不好吃？只列今天菜单上的菜。',
   winDay: '今天',
@@ -155,8 +155,15 @@ let zhCache = {};
 const tr = s => (ZH && zhCache[String(s).replace(/\s+/g, ' ')]) || s;
 const meal = s => (ZH && MEALS[key(s)]) || s;
 
+// Chinese version also hides the everyday staples (fixed.json: "station||dish" on the menu
+// at least half of Aug–Nov 2026), so the meal tabs show only what rotates.
+let fixedSet = new Set();
+
 async function loadZh() {
-  try { zhCache = await (await fetch('zh.json')).json(); } catch (e) { /* stay English */ }
+  const get = async f => { try { return await (await fetch(f)).json(); } catch (e) { return null; } };
+  const [names, fixed] = await Promise.all([get('zh.json'), get('fixed.json')]);
+  zhCache = names || {};
+  fixedSet = new Set(fixed || []);
 }
 
 if (ZH) {
@@ -266,7 +273,7 @@ async function vote(k, name, stars) {
 
 function render() {
   renderTabs();
-  const dishes = state.dishes[state.period] || [];
+  const dishes = (state.dishes[state.period] || []).filter(d => !fixedSet.has(d.station + '||' + d.name.replace(/\s+/g, ' ')));
   renderProtein(dishes); renderRatings(dishes); renderRate(dishes);
 }
 
