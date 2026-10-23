@@ -53,6 +53,9 @@ li.row:first-child { border-top: 0; }
 .rank { font-family: "Big Shoulders Display", Impact, sans-serif; font-size: 22px; color: var(--muted); text-align: center; }
 li.row:nth-child(-n+3) .rank { color: var(--accent); }
 .name { font-weight: 600; overflow-wrap: anywhere; }
+.name .en { display: block; font-weight: 400; font-size: 12px; color: var(--muted); }
+:lang(zh) body, :lang(zh) h1, :lang(zh) h2 { font-family: Inter, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif; }
+:lang(zh) h1, :lang(zh) h2 { font-weight: 800; letter-spacing: 0; }
 .meta { color: var(--muted); font-size: 12.5px; }
 .num { text-align: right; white-space: nowrap; }
 .num b { font-size: 18px; }
@@ -76,35 +79,35 @@ footer a { color: inherit; }
 <body>
 <div class="wrap">
   <header>
-    <h1>Pierce <span>Protein</span> Board</h1>
-    <p class="sub" id="sub">Loading today's menu…</p>
+    <h1 data-t="title">Pierce <span>Protein</span> Board</h1>
+    <p class="sub" id="sub" data-t="loading">Loading today's menu…</p>
   </header>
   <div class="tabs" id="tabs" role="group" aria-label="Meal"></div>
 
   <div class="grid">
     <section class="card">
-      <h2>Most protein</h2>
-      <p class="hint">Per serving, from Pierce's own nutrition data.</p>
+      <h2 data-t="most">Most protein</h2>
+      <p class="hint" data-t="mostHint">Per serving, from Pierce's own nutrition data.</p>
       <ol id="protein"></ol>
     </section>
     <section class="card">
-      <h2>Student ratings</h2>
-      <p class="hint">How good was the protein? Only dishes on today's menu.</p>
+      <h2 data-t="ratings">Student ratings</h2>
+      <p class="hint" data-t="ratingsHint">How good was the protein? Only dishes on today's menu.</p>
       <div class="seg" role="group" aria-label="Rating window">
-        <button data-win="day" aria-pressed="true">Today's votes</button>
-        <button data-win="all" aria-pressed="false">All-time</button>
+        <button data-win="day" aria-pressed="true" data-t="winDay">Today's votes</button>
+        <button data-win="all" aria-pressed="false" data-t="winAll">All-time</button>
       </div>
       <ol id="ratings"></ol>
     </section>
   </div>
 
   <section class="card rate">
-    <h2>Rate what you ate</h2>
-    <p class="hint">Tap the stars after your meal. One vote per dish per day on this device.</p>
+    <h2 data-t="rate">Rate what you ate</h2>
+    <p class="hint" data-t="rateHint">Tap the stars after your meal. One vote per dish per day on this device.</p>
     <div id="rate"></div>
   </section>
 
-  <footer>
+  <footer data-t="footer">
     Menu and nutrition: <a href="https://dineoncampus.com/stevensdining/pierce-dining-hall" target="_blank" rel="noopener">DineOnCampus</a>.
     A student prototype for MGT 103 (Team Trendsetters). Not affiliated with Stevens Dining.
   </footer>
@@ -129,6 +132,53 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 const nut = (it, re) => { const n = (it.nutrients || []).find(x => re.test(x.name)); return n ? parseFloat(n.value_numeric) : NaN; };
 
 function store(k, v) { try { if (v === undefined) return JSON.parse(localStorage.getItem(k) || 'null'); localStorage.setItem(k, JSON.stringify(v)); } catch (e) { return null; } }
+
+// Chinese UI: ?lang=zh. Dish and station names are machine-translated and cached on this device;
+// votes still go in under the English name so both versions share one set of ratings.
+const ZH = new URLSearchParams(location.search).get('lang') === 'zh';
+const ZH_TEXT = {
+  title: 'Pierce <span>蛋白质</span>榜',
+  loading: '正在加载今天的菜单…',
+  most: '蛋白质最多',
+  mostHint: '每份的含量，数据来自 Pierce 官方营养信息。',
+  ratings: '学生评分',
+  ratingsHint: '蛋白质好不好吃？只列今天菜单上的菜。',
+  winDay: '今天',
+  winAll: '全部',
+  rate: '给吃过的打分',
+  rateHint: '吃完点星星。同一台设备每道菜每天只能投一票。',
+  footer: '菜单和营养数据：<a href="https://dineoncampus.com/stevensdining/pierce-dining-hall" target="_blank" rel="noopener">DineOnCampus</a>。菜名为机器翻译。MGT 103 学生原型（Team Trendsetters），与 Stevens Dining 无关。',
+};
+const MEALS = { breakfast: '早餐', brunch: '早午餐', lunch: '午餐', dinner: '晚餐', 'late night': '夜宵' };
+// Pierce's station names, and dishes the machine translation gets wrong
+const ZH_FIXED = {
+  'Delicious Without': '无过敏原', Omelet: '煎蛋卷', Grill: '烤台', Salad: '沙拉吧', 'The Soup Bowl': '汤',
+  Homestyle: '家常菜', Pizza: '披萨', Pasta: '意面', Deli: '三明治', Rotisserie: '烤肉', Sushi: '寿司',
+  'Hamburger on Bun': '汉堡', 'Thinly Sliced Deli Turkey Breast': '火鸡胸肉薄片', 'Chili Rub Chicken': '辣粉烤鸡',
+};
+const zhCache = Object.assign((ZH && store('zh-names')) || {}, ZH_FIXED);
+const tr = s => (ZH && zhCache[s]) || s;
+const meal = s => (ZH && MEALS[key(s)]) || s;
+
+async function translateNames(names) {
+  const todo = [...new Set(names)].filter(n => n && !zhCache[n]);
+  // one request per batch of ~40 lines; Google's gtx endpoint allows CORS
+  for (let i = 0; i < todo.length; i += 40) {
+    const batch = todo.slice(i, i + 40);
+    try {
+      const r = await (await fetch('https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh-CN&dt=t&q=' + encodeURIComponent(batch.join('\n')))).json();
+      const out = r[0].map(x => x[0]).join('').split('\n');
+      if (out.length === batch.length) batch.forEach((n, j) => { if (out[j].trim()) zhCache[n] = out[j].trim(); });
+    } catch (e) { /* fall back to English */ }
+  }
+  store('zh-names', zhCache);
+}
+
+if (ZH) {
+  document.documentElement.lang = 'zh-CN';
+  document.title = 'Pierce 蛋白质榜';
+  document.querySelectorAll('[data-t]').forEach(el => el.innerHTML = ZH_TEXT[el.dataset.t]);
+}
 
 async function loadMenu() {
   const t = etToday();
@@ -163,20 +213,24 @@ async function loadVotes() {
 
 function renderTabs() {
   const el = document.getElementById('tabs');
-  el.innerHTML = state.periods.map(p => `<button aria-pressed="${p.name === state.period}">${esc(p.name)}</button>`).join('');
-  el.querySelectorAll('button').forEach(b => b.onclick = () => { state.period = b.textContent; render(); });
+  el.innerHTML = state.periods.map(p => `<button aria-pressed="${p.name === state.period}" data-period="${esc(p.name)}">${esc(meal(p.name))}</button>`).join('');
+  el.querySelectorAll('button').forEach(b => b.onclick = () => { state.period = b.dataset.period; render(); });
 }
+
+const L = (en, zh) => ZH ? zh : en;
+// Chinese name first, English underneath so it still matches the sign at the station
+const dishName = d => ZH && zhCache[d.name] ? `${esc(zhCache[d.name])}<span class="en">${esc(d.name)}</span>` : esc(d.name);
 
 function renderProtein(dishes) {
   const top = dishes.filter(d => d.protein >= 5).sort((a, b) => b.protein - a.protein).slice(0, 12);
   const max = top.length ? top[0].protein : 1;
   document.getElementById('protein').innerHTML = top.length ? top.map((d, i) => `
     <li class="row"><span class="rank">${i + 1}</span>
-      <div><div class="name">${esc(d.name)}</div>
-        <div class="meta">${esc(d.station)}${d.portion ? ' · ' + esc(d.portion) : ''}${d.kcal > 0 ? ' · ' + Math.round(d.protein / d.kcal * 100) + ' g per 100 kcal' : ''}</div>
+      <div><div class="name">${dishName(d)}</div>
+        <div class="meta">${esc(tr(d.station))}${d.portion ? ' · ' + esc(d.portion) : ''}${d.kcal > 0 ? ' · ' + L(Math.round(d.protein / d.kcal * 100) + ' g per 100 kcal', '每 100 kcal 含 ' + Math.round(d.protein / d.kcal * 100) + ' g') : ''}</div>
         <div class="bar"><i style="width:${d.protein / max * 100}%"></i></div></div>
       <div class="num"><b>${d.protein} g</b><small>${d.kcal > 0 ? d.kcal + ' kcal' : ''}</small></div></li>`).join('')
-    : '<li class="empty">No protein data for this meal.</li>';
+    : `<li class="empty">${L('No protein data for this meal.', '这一餐没有蛋白质数据。')}</li>`;
 }
 
 function renderRatings(dishes) {
@@ -185,9 +239,9 @@ function renderRatings(dishes) {
     .sort((a, b) => b.avg - a.avg || b.n - a.n).slice(0, 12);
   document.getElementById('ratings').innerHTML = rows.length ? rows.map((d, i) => `
     <li class="row"><span class="rank">${i + 1}</span>
-      <div><div class="name">${esc(d.name)}</div><div class="meta">${esc(d.station)} · ${d.protein} g protein</div></div>
-      <div class="num"><b>${d.avg.toFixed(1)}</b> <span class="stars">★</span><small>${d.n} vote${d.n > 1 ? 's' : ''}</small></div></li>`).join('')
-    : `<li class="empty">${state.win === 'day' ? 'No votes yet today. Be the first below.' : 'None of these dishes has been rated yet.'}</li>`;
+      <div><div class="name">${dishName(d)}</div><div class="meta">${esc(tr(d.station))} · ${L(d.protein + ' g protein', '蛋白质 ' + d.protein + ' g')}</div></div>
+      <div class="num"><b>${d.avg.toFixed(1)}</b> <span class="stars">★</span><small>${L(d.n + ' vote' + (d.n > 1 ? 's' : ''), d.n + ' 票')}</small></div></li>`).join('')
+    : `<li class="empty">${state.win === 'day' ? L('No votes yet today. Be the first below.', '今天还没人投票，在下面投第一票。') : L('None of these dishes has been rated yet.', '这些菜还没有人评过分。')}</li>`;
 }
 
 function renderRate(dishes) {
@@ -196,11 +250,11 @@ function renderRate(dishes) {
   const el = document.getElementById('rate');
   el.innerHTML = list.length ? list.map(d => {
     const v = mine[d.key];
-    return `<div class="rate-row"><div><div class="name">${esc(d.name)}</div><div class="meta">${esc(d.station)} · ${d.protein} g protein</div></div>
+    return `<div class="rate-row"><div><div class="name">${dishName(d)}</div><div class="meta">${esc(tr(d.station))} · ${L(d.protein + ' g protein', '蛋白质 ' + d.protein + ' g')}</div></div>
       <div class="picker" data-key="${esc(d.key)}" data-name="${esc(d.name)}"${v ? ' data-done' : ''}>
-        ${[1, 2, 3, 4, 5].map(s => `<button aria-label="${s} star${s > 1 ? 's' : ''}" class="${v && s <= v ? 'on' : ''}">★</button>`).join('')}
-        ${v ? '<span class="done">Thanks!</span>' : ''}</div></div>`;
-  }).join('') : '<p class="empty">No protein dishes listed for this meal.</p>';
+        ${[1, 2, 3, 4, 5].map(s => `<button aria-label="${L(s + ' star' + (s > 1 ? 's' : ''), s + ' 星')}" class="${v && s <= v ? 'on' : ''}">★</button>`).join('')}
+        ${v ? `<span class="done">${L('Thanks!', '谢谢！')}</span>` : ''}</div></div>`;
+  }).join('') : `<p class="empty">${L('No protein dishes listed for this meal.', '这一餐没有蛋白质菜。')}</p>`;
   el.querySelectorAll('.picker:not([data-done])').forEach(p => {
     const btns = [...p.querySelectorAll('button')];
     btns.forEach((b, i) => {
@@ -240,13 +294,14 @@ document.querySelectorAll('.seg button').forEach(b => b.onclick = () => {
 (async () => {
   const sub = document.getElementById('sub');
   try {
-    await Promise.all([loadMenu().then(loadVotes)]);
+    await loadMenu();
+    await Promise.all([loadVotes(), ZH ? translateNames(Object.values(state.dishes).flat().flatMap(d => [d.name, d.station])) : null]);
     const d = new Date(state.date + 'T12:00:00');
-    sub.textContent = 'Pierce Dining Hall · ' + d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-    if (!state.periods.length) sub.textContent += ' · Pierce has no menu posted today.';
+    sub.textContent = L('Pierce Dining Hall', 'Pierce 食堂') + ' · ' + d.toLocaleDateString(L('en-US', 'zh-CN'), { weekday: 'long', month: 'long', day: 'numeric' });
+    if (!state.periods.length) sub.textContent += L(' · Pierce has no menu posted today.', ' · Pierce 今天没有发菜单。');
     render();
   } catch (e) {
-    sub.innerHTML = 'Couldn’t load today’s menu. Try refreshing, or check <a href="https://dineoncampus.com/stevensdining/pierce-dining-hall">DineOnCampus</a>.';
+    sub.innerHTML = L('Couldn’t load today’s menu. Try refreshing, or check ', '今天的菜单没加载出来。刷新试试，或者去看 ') + '<a href="https://dineoncampus.com/stevensdining/pierce-dining-hall">DineOnCampus</a>' + L('.', '。');
   }
 })();
 </script>
