@@ -15,14 +15,14 @@
 html { background:var(--blue); }
 body { margin:0; min-height:100svh; background:var(--blue); color:var(--white); font-family:"Bricolage Grotesque",system-ui,sans-serif; font-size:19px; line-height:1.45; overflow-x:hidden; }
 main { min-height:100svh; max-width:1280px; margin:0 auto; padding:clamp(28px,5vw,64px) clamp(20px,5vw,64px) 28px; display:grid; grid-template-columns:minmax(0,1fr) minmax(320px,430px); grid-template-rows:auto auto 1fr auto; column-gap:clamp(32px,6vw,96px); }
-h1 { grid-column:1 / -1; margin:0; font-size:clamp(68px,14.6vw,196px); line-height:.86; font-weight:800; font-stretch:75%; letter-spacing:-.025em; font-variation-settings:"opsz" 96; }
+h1 { grid-column:1 / -1; margin:0; font-size:clamp(64px,12.6vw,172px); line-height:.92; font-weight:700; font-stretch:88%; letter-spacing:.002em; font-variation-settings:"opsz" 40; text-wrap:balance; }
 .stars { grid-column:1 / -1; display:flex; gap:clamp(2px,1vw,14px); margin:clamp(20px,3vw,36px) 0 clamp(24px,4vw,52px) -4px; }
 .stars svg { width:clamp(58px,13vw,150px); height:auto; flex:none; }
 .stars .on { fill:var(--yellow); }
 .stars .off { fill:none; stroke:var(--mist); stroke-width:1.5; stroke-linejoin:round; }
 .pitch { align-self:start; max-width:30em; }
 .pitch p { margin:0 0 14px; }
-.pitch .lead { font-size:clamp(26px,3.2vw,38px); line-height:1.1; font-weight:700; font-stretch:88%; margin-bottom:18px; }
+.pitch .lead { font-size:clamp(26px,3.2vw,38px); line-height:1.1; font-weight:700; font-stretch:88%; margin-bottom:18px; text-wrap:balance; }
 .actions { display:grid; gap:12px; align-self:start; }
 .actions a { display:block; padding:20px 24px; border-radius:18px; text-decoration:none; color:var(--navy); transition:transform .12s ease-out; }
 .actions a:hover { transform:translateY(-3px); }
@@ -35,7 +35,7 @@ h1 { grid-column:1 / -1; margin:0; font-size:clamp(68px,14.6vw,196px); line-heig
 small { grid-column:1 / -1; align-self:end; margin-top:36px; color:var(--mist); font-size:14px; }
 @media (max-width:760px) {
   main { grid-template-columns:minmax(0,1fr); grid-template-rows:none; }
-  h1 { font-size:clamp(72px,24.5vw,180px); }
+  h1 { font-size:clamp(64px,20.5vw,150px); }
   .stars svg { width:calc((100vw - 40px - 16px) / 5); }
   .actions { margin-top:12px; }
 }
