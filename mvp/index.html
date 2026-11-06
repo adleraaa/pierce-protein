@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pierce Review Board</title>
-<meta name="description" content="Stevens students are testing a website where students rate Pierce food. Watch the video, rate a dish, take the survey.">
+<meta name="description" content="Stevens students are testing a website where students rate Pierce food. Rate a dish and take the survey.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -15,8 +15,7 @@ main { max-width:760px; margin:0 auto; padding:48px 16px 56px; }
 h1 { font:800 clamp(48px,11vw,84px)/.95 "Big Shoulders Display",Impact,sans-serif; text-transform:uppercase; letter-spacing:.5px; margin:0 0 20px; }
 h1 span { color:var(--red); }
 p { margin:0 0 16px; }
-video { display:block; width:100%; aspect-ratio:16/9; background:#000; border-radius:14px; margin:28px 0; }
-ol { list-style:none; margin:0; padding:0; display:grid; gap:12px; }
+ol { list-style:none; margin:28px 0 0; padding:0; display:grid; gap:12px; }
 li a { display:flex; align-items:center; gap:16px; padding:18px 20px; border-radius:14px; text-decoration:none; font-weight:600; font-size:20px; line-height:1.3; }
 li a b { flex:none; width:36px; height:36px; border-radius:50%; display:grid; place-items:center; font-size:18px; }
 .primary { background:var(--red); color:#fff; }
@@ -31,13 +30,12 @@ small { display:block; margin-top:28px; color:var(--muted); font-size:14px; }
 <main>
   <h1>Is Pierce any good <span>today?</span></h1>
   <p>The online menu shows what's planned. It can't tell you if the chicken is dry. We're Stevens students testing a website where students rate Pierce food during the meal, so the next person knows what's good before they swipe in.</p>
-  <p>It only works if enough people rate. Watch the video, then help us find out.</p>
-  <video controls playsinline preload="metadata" poster="poster.jpg" src="pierce-review-board.mp4"></video>
+  <p>It only works if enough people rate. Help us find out.</p>
   <ol>
     <li><a class="secondary" href="https://adleraaa.github.io/pierce-protein/v2/"><b>1</b> Open the board and rate your next Pierce meal</a></li>
     <li><a class="secondary" aria-disabled="true"><b>2</b> 1-minute survey: link coming soon</a></li>
   </ol>
-  <small>Early prototype built by Stevens students. Not affiliated with Stevens Dining. The video's voice is AI-generated, and its screens show example data.</small>
+  <small>Early prototype built by Stevens students. Not affiliated with Stevens Dining.</small>
 </main>
 </body>
 </html>
