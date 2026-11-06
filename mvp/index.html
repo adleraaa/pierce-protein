@@ -3,39 +3,71 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pierce Review Board</title>
-<meta name="description" content="Stevens students are testing a website where students rate Pierce food. Rate a dish and take the survey.">
+<meta name="theme-color" content="#1F35E8">
+<title>Is the chicken dry today?</title>
+<meta name="description" content="A student-built site for rating Pierce food during the meal, so you can check before you swipe in.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&display=swap" rel="stylesheet">
 <style>
-:root { --bg:#F5F3EE; --ink:#1C211E; --red:#C8402C; --muted:#666E68; --line:#DEDBD2; }
+:root { --blue:#1F35E8; --yellow:#FFD21F; --white:#FFFFFF; --navy:#0A1270; --mist:#D5DAFF; }
 * { box-sizing:border-box; }
-body { margin:0; background:var(--bg); color:var(--ink); font:400 18px/1.55 Inter,system-ui,sans-serif; }
-main { max-width:760px; margin:0 auto; padding:48px 16px 56px; }
-h1 { font:800 clamp(48px,11vw,84px)/.95 "Big Shoulders Display",Impact,sans-serif; text-transform:uppercase; letter-spacing:.5px; margin:0 0 20px; }
-h1 span { color:var(--red); }
-p { margin:0 0 16px; }
-ol { list-style:none; margin:28px 0 0; padding:0; display:grid; gap:12px; }
-li a { display:flex; align-items:center; gap:16px; padding:18px 20px; border-radius:14px; text-decoration:none; font-weight:600; font-size:20px; line-height:1.3; }
-li a b { flex:none; width:36px; height:36px; border-radius:50%; display:grid; place-items:center; font-size:18px; }
-.primary { background:var(--red); color:#fff; }
-.primary b { background:#fff; color:var(--red); }
-.secondary { background:#fff; color:var(--ink); border:2px solid var(--line); }
-.secondary b { background:var(--ink); color:#fff; }
-a:focus-visible { outline:3px solid var(--ink); outline-offset:2px; }
-small { display:block; margin-top:28px; color:var(--muted); font-size:14px; }
+html { background:var(--blue); }
+body { margin:0; min-height:100svh; background:var(--blue); color:var(--white); font-family:"Bricolage Grotesque",system-ui,sans-serif; font-size:19px; line-height:1.45; overflow-x:hidden; }
+main { min-height:100svh; max-width:1280px; margin:0 auto; padding:clamp(28px,5vw,64px) clamp(20px,5vw,64px) 28px; display:grid; grid-template-columns:minmax(0,1fr) minmax(320px,430px); grid-template-rows:auto auto 1fr auto; column-gap:clamp(32px,6vw,96px); }
+h1 { grid-column:1 / -1; margin:0; font-size:clamp(68px,14.6vw,196px); line-height:.86; font-weight:800; font-stretch:75%; letter-spacing:-.025em; font-variation-settings:"opsz" 96; }
+.stars { grid-column:1 / -1; display:flex; gap:clamp(2px,1vw,14px); margin:clamp(20px,3vw,36px) 0 clamp(24px,4vw,52px) -4px; }
+.stars svg { width:clamp(58px,13vw,150px); height:auto; flex:none; }
+.stars .on { fill:var(--yellow); }
+.stars .off { fill:none; stroke:var(--mist); stroke-width:1.5; stroke-linejoin:round; }
+.pitch { align-self:start; max-width:30em; }
+.pitch p { margin:0 0 14px; }
+.pitch .lead { font-size:clamp(26px,3.2vw,38px); line-height:1.1; font-weight:700; font-stretch:88%; margin-bottom:18px; }
+.actions { display:grid; gap:12px; align-self:start; }
+.actions a { display:block; padding:20px 24px; border-radius:18px; text-decoration:none; color:var(--navy); transition:transform .12s ease-out; }
+.actions a:hover { transform:translateY(-3px); }
+.actions a:active { transform:translateY(1px); }
+.actions a:focus-visible { outline:4px solid var(--white); outline-offset:3px; }
+.actions strong { display:block; font-size:27px; line-height:1.1; font-weight:800; font-stretch:88%; }
+.actions span { display:block; margin-top:4px; font-size:16px; }
+.rate { background:var(--yellow); }
+.survey { background:var(--white); }
+small { grid-column:1 / -1; align-self:end; margin-top:36px; color:var(--mist); font-size:14px; }
+@media (max-width:760px) {
+  main { grid-template-columns:minmax(0,1fr); grid-template-rows:none; }
+  h1 { font-size:clamp(72px,24.5vw,180px); }
+  .stars svg { width:calc((100vw - 40px - 16px) / 5); }
+  .actions { margin-top:12px; }
+}
+@media (prefers-reduced-motion:no-preference) {
+  .stars .on { animation:land .42s cubic-bezier(.2,1.5,.4,1) both; transform-origin:50% 55%; transform-box:fill-box; }
+  .stars svg:nth-child(2) .on { animation-delay:.09s; }
+  .stars svg:nth-child(3) .on { animation-delay:.18s; }
+  .stars svg:nth-child(4) .on { animation-delay:.27s; }
+  @keyframes land { from { transform:scale(.2) rotate(-24deg); opacity:0; } to { transform:none; opacity:1; } }
+}
+@media (prefers-reduced-motion:reduce) { .actions a { transition:none; } .actions a:hover, .actions a:active { transform:none; } }
 </style>
 </head>
 <body>
 <main>
-  <h1>Is Pierce any good <span>today?</span></h1>
-  <p>The online menu shows what's planned. It can't tell you if the chicken is dry. We're Stevens students testing a website where students rate Pierce food during the meal, so the next person knows what's good before they swipe in.</p>
-  <p>It only works if enough people rate. Help us find out.</p>
-  <ol>
-    <li><a class="secondary" href="https://adleraaa.github.io/pierce-protein/v2/"><b>1</b> Open the board and rate your next Pierce meal</a></li>
-    <li><a class="secondary" aria-disabled="true"><b>2</b> 1-minute survey: link coming soon</a></li>
-  </ol>
-  <small>Early prototype built by Stevens students. Not affiliated with Stevens Dining.</small>
+  <h1>Is the chicken dry today?</h1>
+  <div class="stars" role="img" aria-label="Four out of five stars">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path class="on" d="M12 1.8l3.1 6.5 7.1.9-5.2 4.9 1.4 7L12 17.6l-6.4 3.5 1.4-7L1.8 9.2l7.1-.9z"/></svg>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path class="on" d="M12 1.8l3.1 6.5 7.1.9-5.2 4.9 1.4 7L12 17.6l-6.4 3.5 1.4-7L1.8 9.2l7.1-.9z"/></svg>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path class="on" d="M12 1.8l3.1 6.5 7.1.9-5.2 4.9 1.4 7L12 17.6l-6.4 3.5 1.4-7L1.8 9.2l7.1-.9z"/></svg>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path class="on" d="M12 1.8l3.1 6.5 7.1.9-5.2 4.9 1.4 7L12 17.6l-6.4 3.5 1.4-7L1.8 9.2l7.1-.9z"/></svg>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path class="off" d="M12 1.8l3.1 6.5 7.1.9-5.2 4.9 1.4 7L12 17.6l-6.4 3.5 1.4-7L1.8 9.2l7.1-.9z"/></svg>
+  </div>
+  <div class="pitch">
+    <p class="lead">The online menu can't tell you. Someone who just ate at Pierce can.</p>
+    <p>We're Stevens students testing a site where students rate Pierce dishes during the meal, so you can check before you swipe in. It only works if people actually rate.</p>
+  </div>
+  <div class="actions">
+    <a class="rate" href="https://adleraaa.github.io/pierce-protein/v2/"><strong>Rate a dish at Pierce</strong><span>Open the ratings site</span></a>
+    <a class="survey" href="https://docs.google.com/forms/d/e/1FAIpQLSc8mISywakEJQS8UVPNN_-RLn_SWIM4BFVkcD9_PtXZbV7EfA/viewform"><strong>Take the survey</strong><span>About 2 minutes</span></a>
+  </div>
+  <small>A student project. Not run by Stevens Dining.</small>
 </main>
 </body>
 </html>
