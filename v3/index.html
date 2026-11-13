@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pierce Protein Board</title>
+<meta name="description" content="Today's Pierce Dining Hall menu by window: what changed today first, everyday staples below, with student ratings, live reports and photos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f6f4ef;
+  --card: #ffffff;
+  --ink: #1d2420;
+  --muted: #6b726d;
+  --line: #e4e1d8;
+  --accent: #c8402c;
+  --accent-soft: #fbe9e5;
+  --green: #4f6b57;
+  --green-soft: #e6eee8;
+  --amber: #8a5a00;
+  --amber-soft: #f8edd3;
+  --star: #e0a526;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #151816; --card: #1e2320; --ink: #eef0ec; --muted: #9aa39d; --line: #2e3531;
+    --accent: #ff7a63; --accent-soft: #3a221d; --green: #9cc2a6; --green-soft: #233029;
+    --amber: #f2bd4b; --amber-soft: #382d17; --star: #f2bd4b;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #151816; --card: #1e2320; --ink: #eef0ec; --muted: #9aa39d; --line: #2e3531;
+  --accent: #ff7a63; --accent-soft: #3a221d; --green: #9cc2a6; --green-soft: #233029;
+  --amber: #f2bd4b; --amber-soft: #382d17; --star: #f2bd4b;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.45 Inter, system-ui, sans-serif; }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 24px 16px 48px; }
+header h1 { font-family: "Big Shoulders Display", Impact, sans-serif; font-size: 44px; line-height: 1; margin: 0; letter-spacing: .5px; text-transform: uppercase; }
+header h1 span span { color: var(--accent); }
+.ver { font: 600 13px/1 Inter, sans-serif; color: var(--green); background: var(--green-soft); border-radius: 6px; padding: 4px 7px; vertical-align: middle; margin-left: 8px; text-transform: none; letter-spacing: 0; }
+.sub { color: var(--muted); margin: 6px 0 2px; }
+.note { color: var(--muted); font-size: 13px; margin: 0 0 18px; }
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px; }
+.tabs button { border: 1px solid var(--line); background: var(--card); color: var(--ink); padding: 7px 14px; border-radius: 999px; font: 500 14px Inter, sans-serif; cursor: pointer; }
+.tabs button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 760px) { .grid { grid-template-columns: 1fr; } header h1 { font-size: 36px; } }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; min-width: 0; }
+.wrap > .grid, .wrap > .grid + .card { margin-top: 16px; }
+.card h2 { font-family: "Big Shoulders Display", Impact, sans-serif; font-size: 26px; margin: 0; text-transform: uppercase; letter-spacing: .4px; }
+.card .hint { color: var(--muted); font-size: 13px; margin: 2px 0 12px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin-bottom: 10px; }
+.seg button { border: 0; background: transparent; color: var(--muted); padding: 5px 10px; font: 500 13px Inter, sans-serif; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--green-soft); color: var(--green); }
+ol, ul { list-style: none; margin: 0; padding: 0; }
+li.row { display: grid; grid-template-columns: 28px 1fr auto; gap: 10px; align-items: center; padding: 9px 0; border-top: 1px solid var(--line); }
+li.row:first-child { border-top: 0; }
+.rank { font-family: "Big Shoulders Display", Impact, sans-serif; font-size: 22px; color: var(--muted); text-align: center; }
+li.row:nth-child(-n+3) .rank { color: var(--accent); }
+.mid { display: flex; gap: 10px; align-items: center; min-width: 0; }
+.mid > div { min-width: 0; flex: 1; }
+.name { font-weight: 600; overflow-wrap: anywhere; }
+.name .en { display: block; font-weight: 400; font-size: 12px; color: var(--muted); }
+:lang(zh) body, :lang(zh) h1, :lang(zh) h2 { font-family: Inter, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif; }
+:lang(zh) h1, :lang(zh) h2 { font-weight: 800; letter-spacing: 0; }
+.meta { color: var(--muted); font-size: 12.5px; }
+.num { text-align: right; white-space: nowrap; }
+.num b { font-size: 18px; }
+.num small { display: block; color: var(--muted); font-size: 12px; }
+.bar { height: 5px; background: var(--accent-soft); border-radius: 3px; margin-top: 5px; }
+.bar i { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+.stars { color: var(--star); letter-spacing: 1px; }
+.chip { display: inline-block; font: 600 11.5px/1.5 Inter, sans-serif; padding: 1px 8px; border-radius: 999px; white-space: nowrap; }
+.chip.fresh { background: var(--green-soft); color: var(--green); }
+.chip.sitting { background: var(--amber-soft); color: var(--amber); }
+.chip.out { background: var(--accent-soft); color: var(--accent); }
+.status { margin-top: 4px; font-size: 12.5px; color: var(--muted); }
+.thumb { width: 46px; height: 46px; border-radius: 8px; object-fit: cover; border: 1px solid var(--line); background: var(--line); flex: none; cursor: zoom-in; padding: 0; }
+.thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 7px; display: block; }
+#live { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 8px; }
+#live li { border: 1px solid var(--line); border-radius: 10px; padding: 9px 11px; display: flex; gap: 10px; align-items: center; }
+#live li.empty { border: 0; padding: 4px 0; grid-column: 1 / -1; }
+.rate-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 18px; padding: 12px 0; border-top: 1px solid var(--line); align-items: start; }
+.rate-row:first-child { border-top: 0; }
+.acts { display: grid; gap: 8px; justify-items: end; }
+@media (max-width: 760px) { .rate-row { grid-template-columns: 1fr; } .acts { justify-items: start; } }
+.picker { display: flex; gap: 2px; align-items: center; }
+.picker button { border: 0; background: none; font-size: 26px; line-height: 1; cursor: pointer; color: var(--line); padding: 2px; }
+.picker button.on { color: var(--star); }
+.picker[data-done] button { cursor: default; }
+.done { color: var(--green); font-size: 13px; font-weight: 500; margin-left: 6px; }
+.pills { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: flex-end; }
+@media (max-width: 760px) { .pills { justify-content: flex-start; } }
+.pills .lbl { color: var(--muted); font-size: 12.5px; margin-right: 2px; }
+.pills button { border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 999px; padding: 5px 11px; font: 500 13px Inter, sans-serif; cursor: pointer; }
+.pills button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.pills button:disabled { opacity: .55; cursor: default; }
+.pills button[aria-pressed="true"]:disabled { opacity: 1; }
+.pills button.snap { border-style: dashed; }
+.empty { color: var(--muted); padding: 12px 0; }
+dialog { border: 0; border-radius: 14px; padding: 0; max-width: min(92vw, 520px); background: var(--card); color: var(--ink); }
+dialog::backdrop { background: rgba(0, 0, 0, .55); }
+dialog img { display: block; width: 100%; height: auto; border-radius: 14px 14px 0 0; }
+dialog .bar2 { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 14px; flex-wrap: wrap; }
+dialog button { border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 999px; padding: 6px 12px; font: 500 13px Inter, sans-serif; cursor: pointer; }
+.jump { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
+.jump a { text-decoration: none; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 4px 11px; font-size: 13px; }
+.jump a b { color: var(--accent); font-weight: 600; margin-left: 3px; }
+.section-h { font-family: "Big Shoulders Display", Impact, sans-serif; font-size: 30px; text-transform: uppercase; letter-spacing: .4px; margin: 26px 0 2px; }
+:lang(zh) .section-h { font-family: Inter, "PingFang SC", "Microsoft YaHei", sans-serif; font-weight: 800; letter-spacing: 0; }
+.section-hint { color: var(--muted); font-size: 13px; margin: 0 0 12px; }
+.stations { display: grid; gap: 14px; }
+.station { scroll-margin-top: 12px; }
+.station h2 { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+.station h2 .chip { font-family: Inter, sans-serif; text-transform: none; letter-spacing: 0; }
+.chip.rot { background: var(--accent-soft); color: var(--accent); }
+.chip.same { background: var(--green-soft); color: var(--green); }
+.sides { color: var(--muted); font-size: 13px; padding-top: 10px; border-top: 1px solid var(--line); }
+.sides b { color: var(--ink); font-weight: 600; }
+.rate-row .acts { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; }
+.rate-row .picker button { font-size: 22px; }
+.rate-row { padding: 10px 0; gap: 4px 18px; }
+.rate-row .acts .pills { justify-content: flex-start; }
+.score { color: var(--ink); font-weight: 600; }
+@media (max-width: 760px) { .rate-row { grid-template-columns: minmax(0, 1fr) auto; } }
+details.staples { margin-top: 26px; }
+details.staples > summary { cursor: pointer; list-style: none; }
+details.staples > summary::-webkit-details-marker { display: none; }
+details.staples > summary .section-h { display: inline; }
+details.staples > summary .more { color: var(--accent); font-size: 14px; font-weight: 600; margin-left: 8px; }
+footer { color: var(--muted); font-size: 12.5px; margin-top: 24px; }
+footer a { color: inherit; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1><span data-t="title">Pierce <span>Protein</span> Board</span><span class="ver">v3</span></h1>
+    <p class="sub" id="sub" data-t="loading">Loading today's menu…</p>
+    <p class="note" data-t="note">The menu updates from Pierce every day. Live reports and photos come from students and reset at midnight.</p>
+  </header>
+  <div class="tabs" id="tabs" role="group" aria-label="Meal"></div>
+
+  <section class="card">
+    <h2 data-t="now">Right now at Pierce</h2>
+    <p class="hint" data-t="nowHint">What students reported in the last 90 minutes.</p>
+    <ul id="live"></ul>
+  </section>
+
+  <h2 class="section-h" data-t="changed">New today, by window</h2>
+  <p class="section-hint" data-t="changedHint">Dishes that weren't on most of the last 7 days. After you eat, rate it here; today's votes show next to each dish.</p>
+  <nav class="jump" id="jump" aria-label="Windows"></nav>
+  <div class="stations" id="rotating"></div>
+
+  <details class="staples" id="staplesBox">
+    <summary><h2 class="section-h" data-t="same">Same every day</h2><span class="more" id="more"></span></summary>
+    <p class="section-hint" data-t="sameHint">On the menu most days, so these ratings add up across all days instead of resetting.</p>
+    <div class="stations" id="staples"></div>
+  </details>
+
+  <footer data-t="footer">
+    Menu and nutrition: <a href="https://dineoncampus.com/stevensdining/pierce-dining-hall" target="_blank" rel="noopener">DineOnCampus</a>.
+    A student prototype. Not affiliated with Stevens Dining. <a href="../v2/">Version 2</a> · <a href="../">Version 1</a>
+  </footer>
+</div>
+
+<dialog id="viewer">
+  <img id="vimg" alt="">
+  <div class="bar2"><span class="meta" id="vcap"></span>
+    <span><button id="vflag" data-t="flag">Report photo</button> <button id="vclose" data-t="close">Close</button></span></div>
+</dialog>
+<input type="file" id="file" accept="image/*" capture="environment" hidden>
+
+<script>
+const LOC = '58adee613191a2d1edd788c4';
+const API = 'https://api.dineoncampus.com/v1/location/' + LOC + '/periods';
+// v2 backend: same ratings as v1, plus tags, live reports and photos (backend/Code.gs, deployment @4)
+const BACKEND = 'https://script.google.com/macros/s/AKfycbzQV5T3hZ9NmSQqibs8sRttpDAr62xvEtyj6oZCXwqEwE6HKTaIK5Sd1wvqGYbCdwtZlA/exec';
+// Toppings, sauces, sides and raw ingredients (pizza dough) that aren't a protein choice.
+const SKIP = /^(sliced|diced|shredded|crumbled|grated|chopped)\b|\b(sauce|dressing|vinaigrette|ketchup|mustard|mayo(nnaise)?|relish|syrup|gravy|salsa|aioli|hummus|cheese|crumbles?|croutons?|seeds|nuts|dough)$/i;
+const LIVE_WINDOW = 90 * 60 * 1000;   // reports older than this drop off the board
+const LIVE_COOLDOWN = 15 * 60 * 1000; // one report per dish per device per 15 minutes
+
+// Which dishes are "the same every day": a dish counts as a staple at its window if it was on
+// that window on at least STAPLE_DAYS of the last HISTORY_DAYS days (worked out in the browser
+// from DineOnCampus, cached for the day). If the history can't be loaded, fall back to whole
+// windows that 4 weeks of Oct–Nov 2026 menus showed are ~98% identical every day.
+const HISTORY_DAYS = 7, STAPLE_DAYS = 4;
+const FALLBACK_SAME = /^(grill|salad|deli|omelet)$/i;
+// Windows with the most new protein go first (4 weeks of data: Rotisserie, then Homestyle, ...)
+const ORDER = ['rotisserie', 'homestyle', 'delicious without', 'pasta', 'the soup bowl', 'pizza'];
+const MAIN_MIN = 5; // grams of protein for a dish to get its own row; the rest are listed as sides
+
+const state = { date: '', periods: [], dishes: {}, period: '', hist: null,
+  votes: { all: {}, day: {} }, tags: {}, live: [], photos: {}, photoData: {}, busy: {} };
+
+function etToday() {
+  const p = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', hourCycle: 'h23' })
+    .formatToParts(new Date()).reduce((o, x) => (o[x.type] = x.value, o), {});
+  return { y: +p.year, m: +p.month, d: +p.day, h: +p.hour };
+}
+const key = s => String(s).trim().toLowerCase().replace(/\s+/g, ' ');
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const nut = (it, re) => { const n = (it.nutrients || []).find(x => re.test(x.name)); return n ? parseFloat(n.value_numeric) : NaN; };
+
+function store(k, v) { try { if (v === undefined) return JSON.parse(localStorage.getItem(k) || 'null'); localStorage.setItem(k, JSON.stringify(v)); } catch (e) { return null; } }
+
+// Chinese UI: ?lang=zh. Dish and station names come from ../zh.json (hand-translated);
+// anything not in it stays English. Everything is stored under the English name.
+const ZH = new URLSearchParams(location.search).get('lang') === 'zh';
+const ZH_TEXT = {
+  title: 'Pierce <span>蛋白质</span>榜',
+  loading: '正在加载今天的菜单…',
+  note: '菜单每天从 Pierce 自动更新。现场状态和照片来自同学，每天零点清空。',
+  now: 'Pierce 现在',
+  nowHint: '同学们最近 90 分钟报的情况。',
+  changed: '今天新换的，按窗口',
+  changedHint: '过去 7 天里大多数天都没有的菜。吃完在这里打分，每道菜旁边显示今天的评分。',
+  same: '天天都有',
+  sameHint: '大多数天都在菜单上，所以评分按所有天累计，不每天清零。',
+  flag: '举报照片',
+  close: '关闭',
+  footer: '菜单和营养数据：<a href="https://dineoncampus.com/stevensdining/pierce-dining-hall" target="_blank" rel="noopener">DineOnCampus</a>。学生原型，与 Stevens Dining 无关。<a href="../v2/?lang=zh">第二版</a> · <a href="../?lang=zh">第一版</a>',
+};
+const MEALS = { breakfast: '早餐', brunch: '早午餐', lunch: '午餐', dinner: '晚餐', 'late night': '夜宵' };
+const L = (en, zh) => ZH ? zh : en;
+const STATUS = { fresh: L('Fresh batch', '刚出锅'), sitting: L('Sitting out', '放久了'), out: L('Ran out', '没了') };
+const TAGS = { juicy: L('Juicy', '多汁'), tasty: L('Tasty', '好吃'), hot: L('Hot', '热乎'), dry: L('Dry', '柴'), bland: L('Bland', '没味'), cold: L('Cold', '凉了') };
+let zhCache = {};
+const tr = s => (ZH && zhCache[String(s).replace(/\s+/g, ' ')]) || s;
+const meal = s => (ZH && MEALS[key(s)]) || s;
+
+async function loadZh() {
+  try { zhCache = await (await fetch('../zh.json')).json() || {}; } catch (e) { zhCache = {}; }
+}
+
+if (ZH) {
+  document.documentElement.lang = 'zh-CN';
+  document.title = 'Pierce 蛋白质榜';
+  document.querySelectorAll('[data-t]').forEach(el => el.innerHTML = ZH_TEXT[el.dataset.t]);
+}
+
+async function loadMenu() {
+  const t = etToday();
+  state.date = `${t.y}-${String(t.m).padStart(2, '0')}-${String(t.d).padStart(2, '0')}`;
+  const q = `?platform=0&date=${t.y}-${t.m}-${t.d}`;
+  const list = await (await fetch(API + q)).json();
+  state.periods = (list.periods || []).sort((a, b) => a.sort_order - b.sort_order);
+  await Promise.all(state.periods.map(async p => {
+    const r = await (await fetch(API + '/' + p.id + q)).json();
+    const seen = new Map();
+    for (const c of (r.menu && r.menu.periods && r.menu.periods.categories) || []) {
+      for (const it of c.items) {
+        const protein = nut(it, /^protein/i), kcal = nut(it, /^calories/i);
+        if (!(protein >= 0) || protein > 100 || kcal > 2500) continue; // bad data happens
+        if (SKIP.test(it.name) && !/\bwith\b/i.test(it.name)) continue; // keep "Penne with Vodka Sauce"
+        const k = key(it.name), sk = key(c.name) + '||' + k; // same dish can sit at two windows
+        if (!seen.has(sk) || seen.get(sk).protein < protein)
+          seen.set(sk, { name: it.name.trim(), key: k, sk, station: c.name, protein, kcal, portion: it.portion || '' });
+      }
+    }
+    state.dishes[p.name] = [...seen.values()];
+  }));
+  // default tab: the meal being served now (ET)
+  const h = t.h, names = state.periods.map(p => p.name);
+  const pick = h < 11 ? /breakfast|brunch/i : h < 16 ? /lunch|brunch/i : h < 21 ? /dinner/i : /late/i;
+  state.period = names.find(n => pick.test(n)) || names[0] || '';
+}
+
+// Breakfast is compared with past breakfasts; every other meal with past lunch/dinner/brunch/late night.
+const group = name => /breakfast/i.test(name) ? 'b' : 'm';
+
+// For each "window||dish", on how many of the last HISTORY_DAYS days it was served.
+async function loadHistory() {
+  const cacheKey = 'hist3-' + state.date;
+  const cached = store(cacheKey);
+  if (cached && cached.days) { state.hist = cached; return; }
+  const [y, m, d] = state.date.split('-').map(Number);
+  const days = [];
+  for (let i = 1; i <= HISTORY_DAYS; i++) {
+    const t = new Date(Date.UTC(y, m - 1, d - i));
+    days.push(`${t.getUTCFullYear()}-${t.getUTCMonth() + 1}-${t.getUTCDate()}`);
+  }
+  const counts = { b: {}, m: {} };
+  const ok = await Promise.all(days.map(async day => {
+    try {
+      const q = `?platform=0&date=${day}`;
+      const list = await (await fetch(API + q)).json();
+      const seen = { b: new Set(), m: new Set() };
+      await Promise.all((list.periods || []).map(async p => {
+        const r = await (await fetch(API + '/' + p.id + q)).json();
+        for (const c of (r.menu && r.menu.periods && r.menu.periods.categories) || [])
+          for (const it of c.items) seen[group(p.name)].add(key(c.name) + '||' + key(it.name));
+      }));
+      if (!seen.b.size && !seen.m.size) return false; // closed or not posted: don't count the day
+      for (const g of ['b', 'm']) for (const sk of seen[g]) counts[g][sk] = (counts[g][sk] || 0) + 1;
+      return true;
+    } catch (e) { return false; }
+  }));
+  const n = ok.filter(Boolean).length;
+  state.hist = { days: n, counts };
+  if (n >= 4) store(cacheKey, state.hist); // only cache a good history
+  // drop older days' caches
+  try { Object.keys(localStorage).filter(k => k.startsWith('hist3-') && k !== cacheKey).forEach(k => localStorage.removeItem(k)); } catch (e) {}
+}
+
+function isStaple(d) {
+  const h = state.hist;
+  if (!h || h.days < 4) return FALLBACK_SAME.test(d.station);
+  const need = Math.min(STAPLE_DAYS, Math.ceil(h.days / 2) + 1);
+  return (h.counts[group(state.period)][d.sk] || 0) >= need;
+}
+
+function take(j) {
+  if (!j || !j.all) return;
+  state.votes = { all: j.all, day: j.day || {} };
+  state.tags = j.tags || {};
+  state.live = j.live || [];
+  state.photos = j.photos || {};
+  for (const k of Object.keys(state.photoData)) if (!state.photos[k]) delete state.photoData[k];
+}
+
+async function loadData() {
+  try { take(await (await fetch(BACKEND + '?date=' + state.date)).json()); } catch (e) { /* keep empty */ }
+}
+
+// Photos come one per request so the main read stays small.
+async function loadPhotos() {
+  const want = Object.keys(state.photos).filter(k => !state.photoData[k]);
+  await Promise.all(want.map(async k => {
+    try {
+      const j = await (await fetch(BACKEND + '?date=' + state.date + '&photo=' + encodeURIComponent(k))).json();
+      if (j.data) state.photoData[k] = j.data;
+    } catch (e) { /* skip that one */ }
+  }));
+  if (want.length) render();
+}
+
+// text/plain keeps this a simple CORS request (no preflight, which Apps Script can't answer)
+async function post(body) {
+  const r = await fetch(BACKEND, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ ...body, date: state.date }) });
+  const j = await r.json();
+  if (j.error) throw new Error(j.error);
+  take(j);
+  return j;
+}
+
+function ago(ms) {
+  const m = Math.max(0, Math.round((Date.now() - ms) / 60000));
+  if (m < 1) return L('just now', '刚刚');
+  if (m < 60) return L(m + ' min ago', m + ' 分钟前');
+  return L(Math.floor(m / 60) + ' h ' + (m % 60) + ' min ago', Math.floor(m / 60) + ' 小时 ' + (m % 60) + ' 分钟前');
+}
+
+// Latest report per dish within the window, plus how many agreed with it.
+function liveByDish() {
+  const out = {}, cutoff = Date.now() - LIVE_WINDOW;
+  for (const [ms, k, s] of state.live) {
+    if (ms < cutoff) continue;
+    if (!out[k] || ms >= out[k].ms) out[k] = { ms, s, n: 0 };
+  }
+  for (const [ms, k, s] of state.live) if (ms >= cutoff && out[k] && out[k].s === s) out[k].n++;
+  return out;
+}
+
+function topTags(k) {
+  const t = state.tags[k] || {};
+  return Object.entries(t).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([tag, n]) => `${TAGS[tag] || tag} ×${n}`).join(' · ');
+}
+
+function renderTabs() {
+  const el = document.getElementById('tabs');
+  el.innerHTML = state.periods.map(p => `<button aria-pressed="${p.name === state.period}" data-period="${esc(p.name)}">${esc(meal(p.name))}</button>`).join('');
+  el.querySelectorAll('button').forEach(b => b.onclick = () => { state.period = b.dataset.period; render(); });
+}
+
+// Chinese name first, English underneath so it still matches the sign at the station
+const stationName = s => tr(s) !== s ? `${esc(tr(s))} ${esc(s)}` : esc(s);
+const dishName = d => tr(d.name) !== d.name ? `${esc(tr(d.name))}<span class="en">${esc(d.name)}</span>` : esc(d.name);
+const thumb = d => state.photoData[d.key] ? `<button class="thumb" data-photo="${esc(d.key)}" aria-label="${L('Photo of ', '照片：') + esc(d.name)}"><img src="${state.photoData[d.key]}" alt=""></button>` : '';
+const chip = live => live ?`<div class="status"><span class="chip ${live.s}">${STATUS[live.s]}</span> ${ago(live.ms)}${live.n > 1 ? L(' · ' + live.n + ' reports', ' · ' + live.n + ' 人报') : ''}</div>` : '';
+
+function findDish(k) {
+  for (const p of state.periods) { const d = (state.dishes[p.name] || []).find(x => x.key === k); if (d) return d; }
+  return { key: k, name: k.replace(/\b\w/g, c => c.toUpperCase()), station: '' };
+}
+
+function renderLive() {
+  const live = liveByDish();
+  const rows = Object.entries(live).sort((a, b) => b[1].ms - a[1].ms).slice(0, 9);
+  document.getElementById('live').innerHTML = rows.length ? rows.map(([k, v]) => {
+    const d = findDish(k);
+    return `<li>${thumb(d)}<div><div class="name">${dishName(d)}</div>
+      <div class="status"><span class="chip ${v.s}">${STATUS[v.s]}</span> ${ago(v.ms)}${v.n > 1 ? L(' · ' + v.n + ' reports', ' · ' + v.n + ' 人报') : ''}${d.station ? ' · ' + stationName(d.station) : ''}</div></div></li>`;
+  }).join('') : `<li class="empty">${L('No reports in the last 90 minutes. Eating at Pierce now? Tap Fresh batch, Sitting out or Ran out next to a dish below.', '最近 90 分钟没人报。正在 Pierce 吃饭？在下面的菜旁边点「刚出锅」「放久了」或「没了」。')}</li>`;
+}
+
+// "4.3 ★ · 3 votes today" for new dishes (falls back to earlier days if nobody voted yet);
+// all-time for staples, since the same dish comes back every day.
+function score(d, staple) {
+  const day = state.votes.day[d.key], all = state.votes.all[d.key];
+  const fmt = (v, en, zh) => `<span class="score">${(v[0] / v[1]).toFixed(1)} <span class="stars">★</span></span> ${L(v[1] + ' vote' + (v[1] > 1 ? 's' : '') + en, v[1] + ' 票' + zh)}`;
+  if (!staple && day) return fmt(day, ' today', '（今天）');
+  if (all) return fmt(all, staple ? ' all-time' : ' on earlier days', staple ? '（累计）' : '（以前）');
+  return L('No votes yet', '还没人评');
+}
+
+function rowsHtml(list, live, staple) {
+  const mine = store('votes-' + state.date) || {};
+  const myTags = store('tags-' + state.date) || {};
+  const myLive = store('live-' + state.date) || {};
+  const myPhotos = store('photos-' + state.date) || {};
+  return list.map(d => {
+    const v = mine[d.key], tagged = myTags[d.key] || [];
+    const cool = myLive[d.key] && Date.now() - myLive[d.key] < LIVE_COOLDOWN;
+    const busy = state.busy[d.key];
+    const tags = !staple ? topTags(d.key) : '';
+    return `<div class="rate-row" data-key="${esc(d.key)}" data-name="${esc(d.name)}">
+      <div class="mid">${thumb(d)}<div><div class="name">${dishName(d)}</div>
+        <div class="meta">${score(d, staple)}${tags ? ' · ' + tags : ''}</div>${chip(live[d.key])}</div></div>
+      <div class="num"><b>${d.protein} g</b><small>${L('protein', '蛋白质')}${d.kcal > 0 ? L(' · ' + d.kcal + ' cal', ' · ' + d.kcal + ' 千卡') : ''}</small></div>
+      <div class="acts">
+        <div class="picker"${v ? ' data-done' : ''}>
+          ${[1, 2, 3, 4, 5].map(s => `<button aria-label="${L(s + ' star' + (s > 1 ? 's' : ''), s + ' 星')}" class="${v && s <= v ? 'on' : ''}">★</button>`).join('')}
+          ${v ? `<span class="done">${L('Thanks!', '谢谢！')}</span>` : ''}</div>
+        ${v ? `<div class="pills why"><span class="lbl">${L('Why?', '为什么？')}</span>${Object.keys(TAGS).map(t => `<button data-tag="${t}" aria-pressed="${tagged.includes(t)}"${tagged.includes(t) ? ' disabled' : ''}>${TAGS[t]}</button>`).join('')}</div>` : ''}
+        <div class="pills now">${cool ? `<span class="done">${L('Reported. Thanks!', '已报告，谢谢！')}</span>`
+          : Object.keys(STATUS).map(s => `<button data-status="${s}">${STATUS[s]}</button>`).join('')}
+          <button class="snap"${myPhotos[d.key] || busy ? ' disabled' : ''}>${busy === 'up' ? L('Uploading…', '上传中…') : busy === 'err' ? L('Upload failed', '上传失败') : myPhotos[d.key] ? L('Photo added', '已加照片') : L('Add photo', '加照片')}</button></div>
+      </div></div>`;
+  }).join('');
+}
+
+// One card per window: dishes with real protein get a row; the rest are one "Sides" line.
+function stationCard(name, dishes, live, staple) {
+  const mains = dishes.filter(d => d.protein >= MAIN_MIN).sort((a, b) => b.protein - a.protein);
+  const sides = dishes.filter(d => d.protein < MAIN_MIN);
+  const id = 'w-' + (staple ? 's-' : '') + key(name).replace(/[^a-z0-9]+/g, '-');
+  return `<section class="card station" id="${id}">
+    <h2>${stationName(name)} <span class="chip ${staple ? 'same' : 'rot'}">${staple ? L('Every day', '天天有') : L('New today', '今天新换')}</span></h2>
+    ${rowsHtml(mains, live, staple)}
+    ${sides.length ? `<div class="sides"><b>${L('Sides', '配菜')}:</b> ${sides.map(d => esc(tr(d.name))).join(', ')}</div>` : ''}
+  </section>`;
+}
+
+function byStation(list) {
+  const m = new Map();
+  for (const d of list) { if (!m.has(d.station)) m.set(d.station, []); m.get(d.station).push(d); }
+  const rank = s => { const i = ORDER.indexOf(key(s)); return i < 0 ? ORDER.length : i; };
+  return [...m.entries()].sort((a, b) => rank(a[0]) - rank(b[0]));
+}
+
+function renderStations(dishes, live) {
+  const fresh = dishes.filter(d => !isStaple(d)), same = dishes.filter(isStaple);
+  // a staple served at several windows (Grilled Chicken at Grill, Salad, Delicious Without) shows once
+  const once = new Set(), sameOnce = same.filter(d => !once.has(d.key) && once.add(d.key));
+  const freshGroups = byStation(fresh), sameGroups = byStation(sameOnce);
+
+  const rot = document.getElementById('rotating');
+  rot.innerHTML = freshGroups.length ? freshGroups.map(([s, ds]) => stationCard(s, ds, live, false)).join('')
+    : `<p class="empty">${state.periods.length ? L('Nothing new at any window this meal. Everything is an everyday dish.', '这一餐没有新换的菜，全是天天有的。') : ''}</p>`;
+  document.getElementById('jump').innerHTML = freshGroups.map(([s, ds]) =>
+    `<a href="#w-${key(s).replace(/[^a-z0-9]+/g, '-')}">${esc(tr(s))}<b>${ds.filter(d => d.protein >= MAIN_MIN).length || ''}</b></a>`).join('');
+  document.getElementById('staples').innerHTML = sameGroups.map(([s, ds]) => stationCard(s, ds, live, true)).join('');
+  document.getElementById('staplesBox').hidden = !sameGroups.length;
+  document.getElementById('more').textContent = L(`${sameGroups.map(([s]) => s).join(', ')} · tap to open`, `${sameGroups.map(([s]) => tr(s)).join('、')} · 点开看`);
+  if (state.hist && state.hist.days < 4) document.getElementById('more').textContent += L(' (rough split: past menus didn’t load)', '（粗略划分：过去的菜单没加载出来）');
+
+  bindRows(rot); bindRows(document.getElementById('staples'));
+}
+
+function bindRows(el) {
+  el.querySelectorAll('.rate-row').forEach(row => {
+    const k = row.dataset.key, name = row.dataset.name;
+    const p = row.querySelector('.picker:not([data-done])');
+    if (p) {
+      const btns = [...p.querySelectorAll('button')];
+      btns.forEach((b, i) => {
+        b.onmouseenter = () => btns.forEach((x, j) => x.classList.toggle('on', j <= i));
+        b.onclick = () => vote(k, name, i + 1);
+      });
+      p.onmouseleave = () => btns.forEach(x => x.classList.remove('on'));
+    }
+    row.querySelectorAll('[data-tag]:not([disabled])').forEach(b => b.onclick = () => tag(k, name, b.dataset.tag));
+    row.querySelectorAll('[data-status]').forEach(b => b.onclick = () => report(k, name, b.dataset.status));
+    const snap = row.querySelector('.snap:not([disabled])');
+    if (snap) snap.onclick = () => { state.snapFor = { k, name }; document.getElementById('file').click(); };
+  });
+}
+
+async function vote(k, name, stars) {
+  const mine = store('votes-' + state.date) || {};
+  if (mine[k]) return;
+  mine[k] = stars; store('votes-' + state.date, mine);
+  render();
+  try { await post({ dish: name, stars }); } catch (e) { await loadData(); }
+  render();
+}
+
+async function tag(k, name, t) {
+  const mine = store('tags-' + state.date) || {};
+  if ((mine[k] || []).includes(t)) return;
+  mine[k] = [...(mine[k] || []), t]; store('tags-' + state.date, mine);
+  render();
+  try { await post({ type: 'tag', dish: name, tag: t }); } catch (e) { await loadData(); }
+  render();
+}
+
+async function report(k, name, s) {
+  const mine = store('live-' + state.date) || {};
+  mine[k] = Date.now(); store('live-' + state.date, mine);
+  state.live = [...state.live, [Date.now(), k, s]];
+  render();
+  try { await post({ type: 'live', dish: name, status: s }); } catch (e) { await loadData(); }
+  render();
+}
+
+// Phone photos are several MB; shrink to 360 px on the long side so one fits in a few KB.
+async function shrink(file) {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((ok, bad) => { const i = new Image(); i.onload = () => ok(i); i.onerror = bad; i.src = url; });
+    const scale = Math.min(1, 360 / Math.max(img.naturalWidth, img.naturalHeight));
+    const c = document.createElement('canvas');
+    c.width = Math.round(img.naturalWidth * scale); c.height = Math.round(img.naturalHeight * scale);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    let q = 0.65, data = c.toDataURL('image/jpeg', q);
+    while (data.length > 38000 && q > 0.3) { q -= 0.1; data = c.toDataURL('image/jpeg', q); }
+    return data;
+  } finally { URL.revokeObjectURL(url); }
+}
+
+document.getElementById('file').onchange = async e => {
+  const file = e.target.files[0], target = state.snapFor;
+  e.target.value = '';
+  if (!file || !target) return;
+  state.busy[target.k] = 'up'; render();
+  try {
+    const data = await shrink(file);
+    await post({ type: 'photo', dish: target.name, data });
+    state.photoData[target.k] = data;
+    const mine = store('photos-' + state.date) || {};
+    mine[target.k] = true; store('photos-' + state.date, mine);
+    delete state.busy[target.k];
+  } catch (err) { state.busy[target.k] = 'err'; }
+  render();
+  if (state.busy[target.k] === 'err') setTimeout(() => { delete state.busy[target.k]; render(); }, 4000);
+};
+
+const viewer = document.getElementById('viewer');
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-photo]');
+  if (!b) return;
+  const k = b.dataset.photo, d = findDish(k);
+  document.getElementById('vimg').src = state.photoData[k];
+  document.getElementById('vimg').alt = d.name;
+  document.getElementById('vcap').textContent = L(`${d.name} · taken ${ago(state.photos[k])}`, `${tr(d.name)} · ${ago(state.photos[k])}拍`);
+  viewer.dataset.key = k;
+  viewer.showModal();
+});
+document.getElementById('vclose').onclick = () => viewer.close();
+viewer.onclick = e => { if (e.target === viewer) viewer.close(); };
+document.getElementById('vflag').onclick = async () => {
+  const k = viewer.dataset.key, d = findDish(k);
+  viewer.close();
+  delete state.photoData[k]; delete state.photos[k];
+  render();
+  try { await post({ type: 'flag', dish: d.name }); } catch (e) { await loadData(); }
+  render();
+};
+
+function render() {
+  renderTabs();
+  const live = liveByDish();
+  renderLive(); renderStations(state.dishes[state.period] || [], live);
+}
+
+(async () => {
+  const sub = document.getElementById('sub');
+  try {
+    await Promise.all([loadMenu().then(() => Promise.all([loadData(), loadHistory()])), ZH ? loadZh() : null]);
+    const d = new Date(state.date + 'T12:00:00');
+    sub.textContent = L('Pierce Dining Hall', 'Pierce 食堂') + ' · ' + d.toLocaleDateString(L('en-US', 'zh-CN'), { weekday: 'long', month: 'long', day: 'numeric' });
+    if (!state.periods.length) sub.textContent += L(' · Pierce has no menu posted today.', ' · Pierce 今天没有发菜单。');
+    render();
+    loadPhotos();
+    // keep "x min ago" and other people's reports current while the page is open
+    setInterval(async () => { await loadData(); await loadPhotos(); render(); }, 60000);
+  } catch (e) {
+    sub.innerHTML = L('Couldn’t load today’s menu. Try refreshing, or check ', '今天的菜单没加载出来。刷新试试，或者去看 ') + '<a href="https://dineoncampus.com/stevensdining/pierce-dining-hall">DineOnCampus</a>' + L('.', '。');
+  }
+})();
+</script>
+</body>
+</html>
